@@ -1,0 +1,42 @@
+#!/bin/bash
+# Show stats about git repos with pending changes
+
+count() {
+    [[ $(($1 + $2)) -gt 0 ]] && dirty=$(($dirty + 1))
+}
+
+show() {
+    # local dir=$(pwd | sed "s#$HOME#~#")
+    local dir=$(pwd)
+    [[ $(($1 + $2)) -gt 0 ]] && \
+        echo -e "$(($1 + $2)),$1,$2,$dir"
+        # echo "$dir: $1 uncommitted, $2 unpushed"
+}
+
+
+case $1 in
+"")
+    func=count
+    ;;
+-a)
+    func=show
+    echo "total,uncommitted,unpushed,directory" 1>&2
+    ;;
+*)
+    echo -e "Usage: pod repos [-a]\n  -a Show details for each repo" 1>&2
+    exit 2
+    ;;
+esac
+
+dirty=0
+
+for git_dir in $(find ~ -type d -a -name .git); do
+    cd $git_dir/..
+    uncommitted=$(git status -s | wc -l)
+    unpushed=$(git log --branches --not --remotes | grep '^commmit ' | wc -l)
+    $func $uncommitted $unpushed
+done
+
+[[ $dirty -gt 1 ]] && plural=s
+[[ $dirty -gt 0 ]] && echo $dirty dirty repo$plural
+exit 0

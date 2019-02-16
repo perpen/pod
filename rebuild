@@ -4,4 +4,5 @@ user=joe
 docker stop pod || true
 docker rm pod || true
 docker build -t pod .
-docker run --name pod --hostname $user-box -p 3000:3000 pod $user
+docker run --name pod --hostname $user-box -v $(pwd):/pod -p 3000:3000 pod \
+    $user https://github.com/perpen/pod-linux-home.git

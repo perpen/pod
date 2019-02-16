@@ -1,0 +1,43 @@
+#!/bin/sh
+# Small utilities
+
+set -e
+
+die() {
+    [[ "$1" = "-f" ]] || {
+        echo "This will kill your container and forever lose your files"
+        read -p "Type yes to confirm: " answer
+        [[ "$answer" != yes ]] && exit 1
+    }
+    ps -ef | egrep ' root .* node \.' | grep -v grep | awk '{print $1}' | xargs sudo kill
+}
+
+args() {
+    cat ~/.pod-args
+}
+
+pairing() {
+    /pod/pod-pairing "$@"
+}
+
+secrets() {
+    /pod/pod-secrets "$@"
+}
+
+repos() {
+    /pod/pod-repos "$@"
+}
+
+tmux() {
+    /pod/pod-tmux "$@"
+}
+
+case $1 in
+die|tmux|args|pairing|secrets|repos)
+    eval "$@"
+    ;;
+*)
+    echo "Usage: $0 (die|tmux|args|pairing|secrets|repos)" 1>&2
+    exit 2
+    ;;
+esac

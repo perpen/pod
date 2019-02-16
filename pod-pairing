@@ -1,0 +1,151 @@
+#!/bin/bash
+# Sharing of tmux session
+
+set -e
+TIMEOUT_MN=30
+
+# /tmp/tmux-*/default:
+#   The tmux socket.
+# /tmp/tmux-*/default-mode:
+#   If present, contains ro or rw and specifies mode for clients connecting
+#   using $0 as their login shell.
+
+usage() {
+    cat <<EOF 1>&2
+Usage: $(basename $0) [ro|rw|off|status]
+  Controls permissions for the current session's tmux socket.
+  Without param:
+  - If in a tmux session, show status.
+  - Else assumes the command is run as a login shell and waits for a session
+    to connect to.
+  When switching off, detaches all clients not belonging to the current user.
+EOF
+    exit 2
+}
+
+open_socket_perms() {
+    chmod 775 $(dirname $socket)
+    chmod 666 $socket
+}
+
+close_socket_perms() {
+    chmod 770 $(dirname $socket)
+    chmod 660 $socket
+}
+
+# Echoes all clients belonging to other users according to param: ro|rw|all
+_clients() {
+    local selection=$1
+    local filter
+    local clients
+    
+    case $selection in
+    rw) filter="grep -v ' (ro)$'" ;;
+    ro) filter="grep ' (ro)$'" ;;
+    all) filter=cat ;;
+    *) echo BUG; exit 66 ;;
+    esac
+    clients=$(tmux list-clients | eval $filter | cut -d: -f1)
+    
+    for client in $clients; do
+        [[ -O $client ]] || echo $client
+    done
+}
+
+# Toggles passed clients
+toggle_clients() {
+    for client in $*; do
+        tmux switch-client -c $client -r
+    done
+}
+
+# Call with ro or rw. Impacts login behaviour.
+set_default_mode() {
+    echo $1 > $(dirname $TMUX)/default-mode
+}
+
+ro() {
+    set_default_mode ro
+    open_socket_perms
+    start_timer
+    # Switch rw clients to ro
+    toggle_clients $(_clients rw)
+}
+
+rw() {
+    set_default_mode rw
+    open_socket_perms
+    start_timer
+    # Switch ro clients to rw
+    toggle_clients $(_clients ro)
+}
+
+off() {
+    for client in $(_clients all); do
+        tmux detach -t $client
+    done
+    close_socket_perms
+}
+
+start_timer() {
+    [[ -z "$(atq)" ]] || (atq | awk '{print $1}' | xargs atrm)
+    echo "Pairing will timeout in $TIMEOUT_MN minutes"
+    echo "/pod/pod pairing timeout_warn" | at now + $(($TIMEOUT_MN - 5)) minutes 2> /dev/null
+    echo "/pod/pod pairing timeout" | at now + $TIMEOUT_MN minutes 2> /dev/null
+}
+    
+# Called when pairing times out
+timeout_warn() {
+    /pod/pod tmux message "Pairing timing out in 5 minutes, run pairing command to extend"
+}
+
+# Called when pairing times out
+timeout() {
+    /pod/pod pairing off
+    /pod/pod tmux banner "Pairing timeout!"
+}
+
+login() {
+    local socket=""
+    
+    echo "Waiting for owner to allow pairing"
+    while :; do
+        socket=$(ls /tmp/tmux-*/default 2> /dev/null | head -1)
+        local mode=$(cat $socket-mode 2> /dev/null)
+        [[ -z "$mode" ]] || break
+        sleep 5
+    done
+    
+    local attach_opt=""
+    [[ "$mode" = "rw" ]] || attach_opt=-r
+    (tmux -S "$socket" ls 2> /dev/null && tmux -S "$socket" attach $attach_opt) && exit
+}
+
+status() {
+    if ls -l $socket | egrep -q '^s......rw'; then
+        local clients_count=$(_clients all | wc -l)
+        echo "$(< $mode_path) ($clients_count)"
+    else
+        echo off
+    fi
+}
+
+# Used as login shell
+[[ -z "$1$TMUX" ]] && login
+
+# CLI
+[[ -z "$TMUX" ]] && usage
+socket=$(echo $TMUX | cut -d, -f1)
+dir=$(dirname $socket)
+mode_path=$dir/default-mode
+[[ -z "$1" ]] && set status
+
+case $1 in
+ro|rw|off|status|timeout|timeout_warn)
+    eval "$@"
+    ;;
+*)
+    echo "Usage: pod pairing [ro|rw|off|status]" 1>&2
+    exit 2
+    ;;
+esac

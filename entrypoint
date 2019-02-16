@@ -1,20 +1,25 @@
 #!/bin/sh
+# Dockerfile entry point, runs the non-interactive user-dependent stuff
+
 set -ex
 
-user=${1:-joe}
+[[ $# -lt 2 ]] && {
+    cat <<EOF 1>&2
+Usage: $(basename $0) STAFF_ID [GIT_URL ...]
+EOF
+    exit 2
+}
 
-apk add vim bash sudo tmux git openssh
+user=$1
+shift
+git_urls="$@"
 
 # Create user
 adduser -D -h /home/$user -s /bin/bash $user && \
-    ( echo "pass:pass" | chpasswd )
+    ( echo "$user:pass" | chpasswd )
 sed -i "s/^\(wheel:.*\)$/\1,$user/" /etc/group
-echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+echo $user >> /etc/at.allow
 
-# Create pair user
-adduser -D -h /home/pair -s /pod/pair-login pair && \
-    ( echo "pair:pair" | chpasswd )
+su $user -c "/pod/user-init $git_urls"
 
-su $user -c /pod/user-init
-    
-node .
+node . --base /

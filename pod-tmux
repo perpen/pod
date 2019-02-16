@@ -1,0 +1,65 @@
+#!/bin/sh
+# tmux utilities
+
+set -e
+
+status() {
+    while :; do
+        local repos=$(pod repos)
+        [[ -z "$repos" ]] || echo -n "| $repos "
+        local secrets=$(pod secrets status)
+        [[ -z "$secrets" ]] || echo -n "| $secrets "
+        echo "| pairing: $(pod pairing status)"
+        sleep 15
+    done
+}
+
+banner() {
+    tmux new-window -n MESSAGE "clear && figlet -f big '$*' && read"
+}
+
+message() {
+    tmux display-message "$*"
+}
+
+layout3h() {
+    local dir="$1"
+    [[ -d "$dir" ]] || {
+        echo "Usage: $0 layout3h DIR" 1>&2
+        exit 2
+    }
+    local name="$(basename $dir)"
+    tmux new-window -n "$name" -c "$dir"
+    tmux split-window -v -c "$dir"
+    tmux split-window -h -c "$dir"
+    tmux select-pane -t 0
+    tmux send-keys vim 'Enter'
+    tmux select-pane -t 1
+    tmux send-keys 'ls -la' 'Enter'
+}
+
+layout3v() {
+    local dir="$1"
+    [[ -d "$dir" ]] || {
+        echo "Usage: $0 layout3v DIR" 1>&2
+        exit 2
+    }
+    local name="$(basename $dir)"
+    tmux new-window -n "$name" -c "$dir"
+    tmux split-window -h -c "$dir"
+    tmux split-window -v -c "$dir"
+    tmux select-pane -t 0
+    tmux send-keys vim 'Enter'
+    tmux select-pane -t 1
+    tmux send-keys 'ls -la' 'Enter'
+}
+
+case $1 in
+status|message|banner|layout3h|layout3v)
+    eval "$@"
+    ;;
+*)
+    echo "Usage: $0 (status|message|banner|layout3h|layout3v)" 1>&2
+    exit 2
+    ;;
+esac
