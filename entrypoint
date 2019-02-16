@@ -1,0 +1,20 @@
+#!/bin/sh
+set -ex
+
+user=${1:-joe}
+
+apk add vim bash sudo tmux git openssh
+
+# Create user
+adduser -D -h /home/$user -s /bin/bash $user && \
+    ( echo "pass:pass" | chpasswd )
+sed -i "s/^\(wheel:.*\)$/\1,$user/" /etc/group
+echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Create pair user
+adduser -D -h /home/pair -s /pod/pair-login pair && \
+    ( echo "pair:pair" | chpasswd )
+
+su $user -c /pod/user-init
+    
+node .

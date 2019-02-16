@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+
+PAIR_SOCKET=/tmp/tmux-pair-socket
+
+[[ -z "$TMUX" ]] && {
+    echo "$0: command must be run from a tmux session" 1>&2
+    exit 1
+}
+
+socket=$(echo $TMUX | cut -d, -f1)
+
+case $arg in
+on)
+    chmod go+rw $socket
+    ln -sf $socket $PAIR_SOCKET
+    echo "pairing on"
+    ;;
+off)
+    chmod go-rwx $socket
+    ln -sf $socket $PAIR_SOCKET
+    echo "pairing off"
+    ;;
+*)
+    if [[ -f $PAIR_SOCKET ]]; then
+        echo on
+    else
+        echo off
+    fi
+    ;;
+esac

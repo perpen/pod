@@ -1,0 +1,14 @@
+#!/bin/bash
+
+SOCKET=/tmp/tmux-pair-socket
+
+echo "Waiting for owner to run 'pairing on'"
+
+while :; do
+    [[ -r $SOCKET ]] && tmux -S $SOCKET ls || {
+        sleep 5
+        continue
+    }
+    tmux -S $SOCKET attach
+    exec "$0" "$@"
+done

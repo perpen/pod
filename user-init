@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -ex
+
+user=$(whoami)
+home_url=https://github.com/perpen/pod-linux-home.git
+
+cd
+
+# Clone user config into homedir
+git init
+git remote add origin $home_url
+git fetch origin
+git checkout -b master --track origin/master
+chmod -R go-rwx .
+
+# Run user init
+[[ -f .pod-init ]] && ./pod-init

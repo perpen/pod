@@ -1,0 +1,7 @@
+#!/bin/bash
+user=joe
+
+docker stop pod || true
+docker rm pod || true
+docker build -t pod .
+docker run --name pod --hostname $user-box -p 3000:3000 pod $user
