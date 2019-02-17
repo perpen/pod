@@ -18,21 +18,21 @@ INSTRUCTIONS
 ============
 - Your own linux-home in stash, eg fork mine
 - Source /pod/pod-profile.sh from your .bash_profile
-- Secrets
+- Secrets - how to seed it simply?
 - tmux config
 - .gitignore: .pod-secrets, .pod-profiled, .pod-args
 
 FILES
 =====
-Dockerfile
-entrypoint - dockerfile entry point
-pod-pairing - utility for sharing tmux session
-pod - cli for calling from within container
-rebuild
-user-init - called after boot to configure user account
+- Dockerfile
+- entrypoint - dockerfile entry point
+- pod - cli for use from the container
+- rebuild
+- user-init - called on container start to configure user account
 
 TODO
 ====
+- big issue: can't expose port in container
 - portal:
   - nice urls, try avoiding ui
   - portal is a k8s app which gets info from url or form, then redirects to
@@ -48,13 +48,14 @@ TODO
 - Name parameter? Appended to owner name (real name instead of staff id?)
 - security:
   - ssl, supported by wetty
-  - safe way to give root?
+  - is it ok to give sudo?
 - random:
   - use terminal as ui, eg for portal or model-t
     - needs node to exit when done
     - use readline for input
 - garbage collecting
-  - how to detect unused containers?
+  - delete container w/o connection for 2 hours
 - my own fancy stuff
   - initialise tmux with 1 window per project, and the 3 panes
+- put all .pod-* files under ~/.pod/
 - delete tmux layouts, or find simple init method

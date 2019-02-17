@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Dockerfile entry point, runs the non-interactive user-dependent stuff
 
 set -ex
@@ -22,4 +22,10 @@ echo $user >> /etc/at.allow
 
 su $user -c "/pod/user-init $git_urls"
 
-node . --base /
+set +x
+while :; do
+    [[ -f /tmp/pod-must-die ]] && pkill node
+    sleep 5
+done &
+set -x
+node . --base / --port 3000

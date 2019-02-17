@@ -1,15 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 # Small utilities
 
 set -e
 
 die() {
     [[ "$1" = "-f" ]] || {
-        echo "This will kill your container and forever lose your files"
+        echo "This will kill your container and forever lose unpushed changes"
         read -p "Type yes to confirm: " answer
         [[ "$answer" != yes ]] && exit 1
     }
-    ps -ef | egrep ' root .* node \.' | grep -v grep | awk '{print $1}' | xargs sudo kill
+    # ps -ef | egrep ' root .* node \.' | grep -v grep | awk '{print $1}' | xargs sudo kill
+    touch /tmp/pod-must-die
 }
 
 args() {

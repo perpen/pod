@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # tmux utilities
 
 set -e
@@ -22,26 +22,10 @@ message() {
     tmux display-message "$*"
 }
 
-layout3h() {
+v3() {
     local dir="$1"
     [[ -d "$dir" ]] || {
-        echo "Usage: $0 layout3h DIR" 1>&2
-        exit 2
-    }
-    local name="$(basename $dir)"
-    tmux new-window -n "$name" -c "$dir"
-    tmux split-window -v -c "$dir"
-    tmux split-window -h -c "$dir"
-    tmux select-pane -t 0
-    tmux send-keys vim 'Enter'
-    tmux select-pane -t 1
-    tmux send-keys 'ls -la' 'Enter'
-}
-
-layout3v() {
-    local dir="$1"
-    [[ -d "$dir" ]] || {
-        echo "Usage: $0 layout3v DIR" 1>&2
+        echo "Usage: $0 v3 DIR" 1>&2
         exit 2
     }
     local name="$(basename $dir)"
@@ -55,11 +39,11 @@ layout3v() {
 }
 
 case $1 in
-status|message|banner|layout3h|layout3v)
+status|message|banner|layout3h|v3)
     eval "$@"
     ;;
 *)
-    echo "Usage: $0 (status|message|banner|layout3h|layout3v)" 1>&2
+    echo "Usage: $0 (status|message|banner|layout3h|v3)" 1>&2
     exit 2
     ;;
 esac
