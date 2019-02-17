@@ -1,18 +1,18 @@
 FLOW
 ====
-Image build - Dockerfile
-    Copies scripts to /pod
-    Installs packages
-    Creates pair user
-Container creation - /pod/entrypoint
-    Creates user
-    Calls /pod/user-init under user's uid
-        Clones user's linux-home
-Login
-    /pod/pod-profile.sh called by user's .bash_profile
-        Decrypts user secrets
-        Clones projects into ~/src        
-        Starts tmux
+- Image build - Dockerfile
+    - Copies scripts to /pod
+    - Installs packages
+    - Creates pair user
+- Container creation - /pod/entrypoint
+    - Creates user
+    - Calls /pod/user-init under user's uid
+        - Clones user's linux-home
+- Login
+    - /pod/pod-profile.sh called by user's .bash_profile
+        - Decrypts user secrets
+        - Clones projects into ~/src        
+        - Starts tmux
 
 INSTRUCTIONS
 ============
