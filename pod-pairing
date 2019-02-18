@@ -24,13 +24,13 @@ EOF
 }
 
 open_socket_perms() {
-    chmod 775 $(dirname $socket)
-    chmod 666 $socket
+    chmod 770 $(dirname $socket)
+    # chmod 660 $socket
 }
 
 close_socket_perms() {
-    chmod 770 $(dirname $socket)
-    chmod 660 $socket
+    chmod 700 $(dirname $socket)
+    # chmod 660 $socket
 }
 
 # Echoes all clients belonging to other users according to param: ro|rw|all
@@ -122,7 +122,7 @@ login() {
 }
 
 status() {
-    if ls -l $socket | egrep -q '^s......rw'; then
+    if ls -ld $(dirname $socket) | egrep -q '^s...r'; then
         local clients_count=$(_clients all | wc -l)
         echo "$(< $mode_path) ($clients_count)"
     else

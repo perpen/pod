@@ -15,17 +15,20 @@ shift
 git_urls="$@"
 
 # Create user
-adduser -D -h /home/$user -s /bin/bash $user && \
+adduser -D -h /home/$user -s /bin/bash -G pair $user && \
     ( echo "$user:pass" | chpasswd )
 sed -i "s/^\(wheel:.*\)$/\1,$user/" /etc/group
+sed -i "s/^\(pair:.*\)$/\1,$user/" /etc/group
 echo $user >> /etc/at.allow
 
 su $user -c "/pod/user-init $git_urls"
 
+# If this very special file appears, we stop the container
 set +x
 while :; do
     [[ -f /tmp/pod-must-die ]] && pkill node
-    sleep 5
+    sleep 10
 done &
 set -x
-node . --base / --port 3000
+
+node . --base / --port 3000 --title "$user pod"

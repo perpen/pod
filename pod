@@ -11,6 +11,7 @@ die() {
     }
     # ps -ef | egrep ' root .* node \.' | grep -v grep | awk '{print $1}' | xargs sudo kill
     touch /tmp/pod-must-die
+    sleep 30
 }
 
 args() {
