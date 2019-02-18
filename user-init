@@ -25,4 +25,5 @@ chmod -R go-rwx .
 }
 
 # Provide args to user scripts
-echo $* > .pod-args
+mkdir .pod
+echo $* > .pod/args

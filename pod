@@ -6,16 +6,17 @@ set -e
 die() {
     [[ "$1" = "-f" ]] || {
         echo "This will kill your container and forever lose unpushed changes"
+        pod secrets status || true
+        pod repos || true
         read -p "Type yes to confirm: " answer
         [[ "$answer" != yes ]] && exit 1
     }
-    # ps -ef | egrep ' root .* node \.' | grep -v grep | awk '{print $1}' | xargs sudo kill
     touch /tmp/pod-must-die
     sleep 30
 }
 
 args() {
-    cat ~/.pod-args
+    cat ~/.pod/args
 }
 
 pairing() {

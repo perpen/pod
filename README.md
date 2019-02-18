@@ -4,7 +4,7 @@ FLOW
     - Copies scripts to /pod
     - Installs packages
     - Creates pair user
-- Container creation - /pod/entrypoint
+- Container start - /pod/entrypoint
     - Creates user
     - Calls /pod/user-init under user's uid
         - Clones user's linux-home
@@ -18,21 +18,13 @@ INSTRUCTIONS
 ============
 - Your own linux-home in stash, eg fork mine
 - Source /pod/pod-profile.sh from your .bash_profile
-- Secrets - how to seed it simply?
+- Secrets - how to seed the gpg simply?
 - tmux config
-- .gitignore: .pod-secrets, .pod-profiled, .pod-args
-
-FILES
-=====
-- Dockerfile
-- entrypoint - dockerfile entry point
-- pod - cli for use from the container
-- rebuild
-- user-init - called on container start to configure user account
+- .gitignore: .pod/secrets, .pod/profiled, .pod/args
 
 TODO
 ====
-- big issue: can't expose port in container
+- expose port in container - tcp auto-ingress?
 - portal:
   - input: linux-home url required, projects urls optional
   - portal is a k8s app which gets info from url or form, then redirects to
@@ -46,6 +38,10 @@ TODO
   - and some may choose to use a team account for this.
   - but secrets url could be a param. Have generic url params: linux-home, secrets,
     whatever - all of them with an init script.
+    - eg: docker run pod joe \\
+          http://stash/tooling/linux-home \\
+          http://stash/joe/secrets \\
+          --repos http://stash/fxt/model-t-build,http://stash/fxt/bundle-keepie
 - copy/paste
 - hostname on k8s
   See https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pods
@@ -59,11 +55,12 @@ TODO
   - use terminal as ui, eg for portal or model-t
     - needs node to exit when done
     - use readline for input
+- pairing
+  - stop pairing when owner disconnects. is timeout still necessary?
 - garbage collecting
   - delete container w/o connection for 2 hours
-- my own fancy stuff
+- fancy stuff
   - initialise tmux with 1 window per project, and the 3 panes
-- put all .pod-* files under ~/.pod/
-- delete tmux layouts, or find simple init method
+- find simple init method for tmux
 - tab title should be pod name
 - use chromium standalone app to get all keyboard shortcuts?
