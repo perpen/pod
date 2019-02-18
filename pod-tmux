@@ -38,8 +38,14 @@ v3() {
     tmux send-keys 'ls -la' 'Enter'
 }
 
+init() {
+    for repo in ~/src/*; do
+        v3 $repo
+    done
+}
+
 case $1 in
-status|message|banner|layout3h|v3)
+init|status|message|banner|layout3h|v3)
     eval "$@"
     ;;
 *)

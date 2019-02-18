@@ -1,9 +1,12 @@
 #!/bin/bash
+
 user=joe
 
-docker stop pod || true
-docker rm pod || true
-docker build -t pod .
+[[ x$1 = x-a ]] && {
+    docker stop pod || true
+    docker rm pod || true
+    docker build -t pod .
+}
 docker run --name pod --hostname pod -v $(pwd):/pod -p 3000:3000 pod \
     $user \
     https://github.com/krishnasrinivas/wetty.git \

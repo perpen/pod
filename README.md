@@ -14,11 +14,27 @@ FLOW
         - Clones projects into ~/src        
         - Starts tmux
 
-INSTRUCTIONS
-============
-- Your own linux-home in stash, eg fork mine
+LINUX-HOME REPO SETUP
+=====================
+```
+# Fork <linux-home skel url> into your personal repo in stash
+# Use the same name for the repo.
+# Then customise your fork.
+$ git clone <your linux-home repo>
+$ cd linux-home
+# Install there all your secrets, in the standard locations.
+# E.g. copy your ssh keys to .ssh/
+# Then you can move your secret files into the .pod/secret tree
+# by running for example:
+$ ./bin/seed-secrets seed .ssh/id_rsa* .npmrc
+# Check what the script did:
+$ find . -type l -ls
+# Encrypt .pod/secret into .pod-secrets.gpg
+$ ./bin/seed-secrets encrypt
+# Add the encrypted file to git, as well as your secret symlinks
+$ git add .pod-secrets.gpg .ssh/id_rsa*
+```
 - Source /pod/pod-profile.sh from your .bash_profile
-- Secrets - how to seed the gpg simply?
 - tmux config
 - .gitignore: .pod/secrets, .pod/profiled, .pod/args
 

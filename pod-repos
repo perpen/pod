@@ -1,10 +1,6 @@
 #!/bin/bash
 # Show stats about git repos with pending changes
 
-count() {
-    [[ $(($1 + $2)) -gt 0 ]] && dirty=$(($dirty + 1))
-}
-
 show() {
     # local dir=$(pwd | sed "s#$HOME#~#")
     local dir=$(pwd)
@@ -13,30 +9,47 @@ show() {
         # echo "$dir: $1 uncommitted, $2 unpushed"
 }
 
+# Detect running in pipe, for tmux status bar
+[[ -t 1 ]] && {
+    bold_on=$(tput smul)
+    bold_off=$(tput rmul)
+}
 
 case $1 in
 "")
-    func=count
+    verbose=true
     ;;
--a)
-    func=show
-    echo "total,uncommitted,unpushed,directory" 1>&2
+"-v")
+    verbose=
     ;;
 *)
-    echo -e "Usage: pod repos [-a]\n  -a Show details for each repo" 1>&2
+    cat <<EOF 1>&2
+Usage: pod repos [-v]
+  Prints the number of dirty repos, or nothing.
+  -v Runs git status on each dirty repo
+EOF
     exit 2
     ;;
 esac
 
-dirty=0
+dirty_count=0
+dirty_repos=""
 
 for git_dir in $(find ~ -type d -a -name .git); do
     cd $git_dir/..
     uncommitted=$(git status -s | wc -l)
     unpushed=$(git log --branches --not --remotes | grep '^commmit ' | wc -l)
-    $func $uncommitted $unpushed
+    [[ $(($uncommitted + $unpushed)) -gt 0 ]] && {
+        dirty_count=$(($dirty_count + 1))
+        $verbose echo "${bold_on}Repo: $(pwd)${bold_off}"
+        $verbose git status
+        echo
+    }
 done
 
-[[ $dirty -gt 1 ]] && plural=s
-[[ $dirty -gt 0 ]] && echo $dirty dirty repo$plural
+[[ $dirty_count -gt 1 ]] && plural=s
+[[ $dirty_count -gt 0 ]] && {
+    echo "${bold_on}$dirty_count dirty repo$plural${bold_off}"
+    exit 1
+}
 exit 0

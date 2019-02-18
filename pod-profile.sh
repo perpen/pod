@@ -4,7 +4,7 @@
 # Run on first login
 [[ -f ~/.pod/profiled ]] || {
     # Secrets
-    [[ -f ~/.pod/secrets.gpg ]] && pod secrets decrypt
+    [[ -f ~/.pod-secrets.gpg ]] && pod secrets decrypt
 
     # Projects
     [[ -f ~/.pod/args ]] && {

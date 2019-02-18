@@ -4,13 +4,17 @@
 set -e
 
 die() {
-    [[ "$1" = "-f" ]] || {
-        echo "This will kill your container and forever lose unpushed changes"
-        pod secrets status || true
-        pod repos || true
-        read -p "Type yes to confirm: " answer
-        [[ "$answer" != yes ]] && exit 1
+    local dirty
+    local prompt=yes
+    pod secrets status || dirty=yes
+    pod repos -v || dirty=yes
+    [[ -z $dirty ]] || {
+        echo
+        echo "This will kill your container and you will lose your changes!"
+        prompt=loser
     }
+    read -p "Type '$prompt' to confirm: " answer
+    [[ "$answer" != "$prompt" ]] && exit 1
     touch /tmp/pod-must-die
     sleep 30
 }
