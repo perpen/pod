@@ -27,7 +27,7 @@ su $user -c "/pod/user-init $git_urls"
 set +x
 while :; do
     [[ -f /tmp/pod-must-die ]] && pkill node
-    sleep 10
+    sleep 5
 done &
 set -x
 

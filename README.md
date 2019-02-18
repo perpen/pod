@@ -36,14 +36,16 @@ TODO
 - portal:
   - input: linux-home url required, projects urls optional
   - portal is a k8s app which gets info from url or form, then redirects to
-    the new wetty.
-  - http://localhost:3000/wetty?projects=FXT/bundle-keepie:policies,43880338/noci
+    the new pod.
+  - http://localhost:3000/pod?projects=FXT/bundle-keepie:policies,43880338/noci
   - support branches. what if multiple branches of same repo? not happen
 - project specifics
   - project can have .pod config with preferred image and optionally version
 - ldap login (either integrated, or on login)
   - why would i need it? what's the risk if i create box using another's home files?
   - and some may choose to use a team account for this.
+  - but secrets url could be a param. Have generic url params: linux-home, secrets,
+    whatever - all of them with an init script.
 - copy/paste
 - hostname on k8s
   See https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pods
